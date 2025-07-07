@@ -53,24 +53,36 @@
     <!-- Header -->
     <div class="header-section">
         <div class="container">
-            <!-- Seletor de Cliente -->
+            <!-- Seletor de Cliente e Logout -->
             <div class="client-selector">
-                <form action="/trocar_cliente" method="post" class="d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="bi bi-building"></i>
-                        <label for="cliente" class="form-label mb-0 me-2">Cliente:</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <form action="/trocar_cliente" method="post" class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-building"></i>
+                            <label for="cliente" class="form-label mb-0 me-2">Cliente:</label>
+                        </div>
+                        <select name="cliente" id="cliente" class="form-select me-3" style="max-width: 200px;" onchange="this.form.submit()">
+                            {% for cliente_id, cliente_display in clientes_disponiveis.items() %}
+                                <option value="{{ cliente_id }}" {% if cliente_id == cliente_atual %}selected{% endif %}>
+                                    {{ cliente_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="client-badge">
+                            <i class="bi bi-check-circle"></i> {{ cliente_nome }}
+                        </div>
+                    </form>
+                    
+                    <!-- Botão de Logout -->
+                    <div class="d-flex align-items-center">
+                        <small class="text-white me-3">
+                            <i class="bi bi-person-circle"></i> {{ session.user_email }}
+                        </small>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm" title="Sair do sistema">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
                     </div>
-                    <select name="cliente" id="cliente" class="form-select me-3" style="max-width: 200px;" onchange="this.form.submit()">
-                        {% for cliente_id, cliente_display in clientes_disponiveis.items() %}
-                            <option value="{{ cliente_id }}" {% if cliente_id == cliente_atual %}selected{% endif %}>
-                                {{ cliente_display }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    <div class="client-badge">
-                        <i class="bi bi-check-circle"></i> {{ cliente_nome }}
-                    </div>
-                </form>
+                </div>
             </div>
             
             <!-- Título -->

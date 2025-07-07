@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, session
 import json
 import os
 import uuid
@@ -6,9 +6,16 @@ import base64
 import shutil
 from werkzeug.utils import secure_filename
 from compreface_client import cadastrar_face, deletar_face
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_multi_cliente'
+app.secret_key = 'sua_chave_secreta_multi_cliente_face_manager_2024'
+
+# 🔐 Configurações de Login (Hardcoded)
+LOGIN_CREDENTIALS = {
+    "email": "Rafa25santis@gmail.com",
+    "password": "Rafa2503"
+}
 
 # 📋 Configurações Multi-Cliente
 CLIENTS_FOLDER = "clients"
@@ -79,15 +86,56 @@ def salvar_metadata(cliente, metadata):
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
 # =====================
+# 🔐 SISTEMA DE AUTENTICAÇÃO
+# =====================
+
+def login_required(f):
+    """Decorator para proteger rotas que requerem login"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session or not session['logged_in']:
+            flash('🔒 Você precisa fazer login para acessar esta página.', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# =====================
 # 🌐 ROTAS PRINCIPAIS (WEB)
 # =====================
 
 @app.route("/")
 def home():
-    """Página inicial - redireciona para cliente padrão"""
+    """Página inicial - redireciona para cliente padrão ou login"""
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect(url_for('login'))
     return redirect(url_for('client_dashboard', cliente=DEFAULT_CLIENT))
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Tela de login"""
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        if email == LOGIN_CREDENTIALS["email"] and password == LOGIN_CREDENTIALS["password"]:
+            session['logged_in'] = True
+            session['user_email'] = email
+            flash('✅ Login realizado com sucesso! Bem-vindo ao Face Manager!', 'success')
+            return redirect(url_for('client_dashboard', cliente=DEFAULT_CLIENT))
+        else:
+            flash('❌ Email ou senha incorretos. Tente novamente.', 'error')
+    
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    """Logout do usuário"""
+    session.clear()
+    flash('👋 Logout realizado com sucesso. Até logo!', 'info')
+    return redirect(url_for('login'))
+
 @app.route("/<cliente>/")
+@login_required
 def client_dashboard(cliente):
     """Dashboard principal do cliente"""
     if not validate_client(cliente):
@@ -103,13 +151,15 @@ def client_dashboard(cliente):
             pessoas=metadata,
             cliente_atual=cliente,
             cliente_nome=client_display_name,
-            clientes_disponiveis=AVAILABLE_CLIENTS
+            clientes_disponiveis=AVAILABLE_CLIENTS,
+            session=session
         )
     except Exception as e:
         flash(f'❌ Erro ao carregar dados do cliente: {str(e)}', 'error')
         return redirect(url_for('client_dashboard', cliente=DEFAULT_CLIENT))
 
 @app.route("/<cliente>/cadastrar", methods=["POST"])
+@login_required
 def cadastrar(cliente):
     """Cadastra nova pessoa para o cliente específico"""
     if not validate_client(cliente):
@@ -166,6 +216,7 @@ def cadastrar(cliente):
     return redirect(url_for('client_dashboard', cliente=cliente))
 
 @app.route("/<cliente>/editar/<subject_id>", methods=["POST"])
+@login_required
 def editar(cliente, subject_id):
     """Edita dados de uma pessoa do cliente específico"""
     if not validate_client(cliente):
@@ -194,6 +245,7 @@ def editar(cliente, subject_id):
     return redirect(url_for('client_dashboard', cliente=cliente))
 
 @app.route("/<cliente>/deletar/<subject_id>", methods=["POST"])
+@login_required
 def deletar(cliente, subject_id):
     """Deleta uma pessoa do cliente específico"""
     if not validate_client(cliente):
@@ -237,6 +289,7 @@ def deletar(cliente, subject_id):
     return redirect(url_for('client_dashboard', cliente=cliente))
 
 @app.route("/<cliente>/faces/<filename>")
+@login_required
 def uploaded_file(cliente, filename):
     """Serve as imagens do cliente específico"""
     if not validate_client(cliente):
@@ -246,6 +299,7 @@ def uploaded_file(cliente, filename):
     return send_from_directory(faces_folder, filename)
 
 @app.route("/trocar_cliente", methods=["POST"])
+@login_required
 def trocar_cliente():
     """Troca de cliente via dropdown"""
     novo_cliente = request.form.get("cliente", DEFAULT_CLIENT)
