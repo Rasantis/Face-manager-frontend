@@ -158,62 +158,14 @@ def client_dashboard(cliente):
         flash(f'❌ Erro ao carregar dados do cliente: {str(e)}', 'error')
         return redirect(url_for('client_dashboard', cliente=DEFAULT_CLIENT))
 
-@app.route("/<cliente>/cadastrar", methods=["POST"])
-@login_required
-def cadastrar(cliente):
-    """Cadastra nova pessoa para o cliente específico"""
-    if not validate_client(cliente):
-        flash(f'❌ Cliente "{cliente}" não encontrado!', 'error')
-        return redirect(url_for('client_dashboard', cliente=DEFAULT_CLIENT))
-    
-    try:
-        # Obter dados do formulário
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        
-        # Validar arquivo de imagem
-        if 'image' not in request.files:
-            flash('❌ Nenhuma imagem foi selecionada!', 'error')
-            return redirect(url_for('client_dashboard', cliente=cliente))
-        
-        img_file = request.files['image']
-        if img_file.filename == '':
-            flash('❌ Nenhuma imagem foi selecionada!', 'error')
-            return redirect(url_for('client_dashboard', cliente=cliente))
-        
-        if not allowed_file(img_file.filename):
-            flash('❌ Tipo de arquivo não permitido! Use: PNG, JPG, JPEG, GIF', 'error')
-            return redirect(url_for('client_dashboard', cliente=cliente))
-        
-        # Gerar ID único e salvar imagem
-        subject_id = str(uuid.uuid4())
-        filename = secure_filename(f"{subject_id}.jpg")
-        faces_folder = get_faces_folder(cliente)
-        img_path = os.path.join(faces_folder, filename)
-        img_file.save(img_path)
-        
-        # Cadastrar face na API do CompreFace (com prefixo do cliente)
-        api_subject_id = f"{cliente}_{subject_id}"
-        cadastrar_face(img_path, api_subject_id)
-        
-        # Salvar metadados
-        metadata = carregar_metadata(cliente)
-        metadata[subject_id] = {
-            "name": name,
-            "email": email,
-            "phone": phone,
-            "image": filename
-        }
-        salvar_metadata(cliente, metadata)
-        
-        client_name = AVAILABLE_CLIENTS[cliente]
-        flash(f'✅ {name} foi cadastrado com sucesso no {client_name}!', 'success')
-        
-    except Exception as e:
-        flash(f'❌ Erro ao cadastrar: {str(e)}', 'error')
-    
-    return redirect(url_for('client_dashboard', cliente=cliente))
+# Rota de cadastro via formulário web REMOVIDA (usar apenas API)
+# @app.route("/<cliente>/cadastrar", methods=["POST"])
+# @login_required
+# def cadastrar(cliente):
+#     """Cadastra nova pessoa para o cliente específico"""
+#     # Esta funcionalidade foi removida da interface web
+#     # Use a API REST: POST /api/<cliente>/persons
+#     pass
 
 @app.route("/<cliente>/editar/<subject_id>", methods=["POST"])
 @login_required
