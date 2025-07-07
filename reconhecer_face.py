@@ -27,8 +27,8 @@ CLIENTE_BUSCA = "pao_de_acucar"
 IMAGEM_TESTE = "lasaro4.jpg"
 
 # URLs das APIs
-COMPREFACE_URL = "http://localhost:8000/api/v1/recognition/recognize"
-FACE_MANAGER_URL = "http://localhost:5000/api"
+COMPREFACE_URL = "https://facial-api.visionlabss.com/api/v1/recognition/recognize"
+FACE_MANAGER_URL = "https://facial-front.visionlabss.com/api"
 
 # Chave da API CompreFace
 API_KEY = "68896071-a604-44b7-beed-6d019f6f62fe"

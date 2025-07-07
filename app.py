@@ -448,7 +448,7 @@ if __name__ == "__main__":
     print("📁 Clientes disponíveis:")
     for cliente, nome in AVAILABLE_CLIENTS.items():
         print(f"   👉 /{cliente}/ - {nome}")
-    print(f"\n🏠 Página inicial: http://localhost:5000/ (redireciona para {DEFAULT_CLIENT})")
+    print(f"\n🏠 Página inicial: https://facial-front.visionlabss.com/ (redireciona para {DEFAULT_CLIENT})")
     print("\n🔗 API Endpoints:")
     print("   👉 GET    /api/clients - Listar clientes")
     print("   👉 GET    /api/<cliente>/persons - Listar pessoas")

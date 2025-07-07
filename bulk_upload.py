@@ -22,7 +22,7 @@ from datetime import datetime
 # 🔧 CONFIGURAÇÕES
 # =====================
 
-API_BASE_URL = "http://localhost:5000/api"
+API_BASE_URL = "https://facial-front.visionlabss.com/api"
 CONFIG_FILE = "upload_config.json"
 DEFAULT_UPLOAD_FOLDER = "upload_images"
 

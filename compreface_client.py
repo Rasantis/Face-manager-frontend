@@ -1,8 +1,8 @@
 import requests
 
 # Configurações da API do CompreFace
-API_KEY = "68896071-a604-44b7-beed-6d019f6f62fe"
-RECOGNITION_URL = "http://localhost:8000/api/v1/recognition/faces"
+API_KEY = "52f25461-4ef8-4489-a10d-c2b076fc62a2"
+RECOGNITION_URL = "https://facial-back.visionlabss.com/api/v1/recognition/faces"
 HEADERS = {"x-api-key": API_KEY}
 
 def cadastrar_face(img_path, subject_id):
