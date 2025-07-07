@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Face Manager - {{ cliente_nome }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .face-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #dee2e6;
+        }
+        .table-actions {
+            white-space: nowrap;
+        }
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .card-form {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        .client-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .client-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-section">
+        <div class="container">
+            <!-- Seletor de Cliente -->
+            <div class="client-selector">
+                <form action="/trocar_cliente" method="post" class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-building"></i>
+                        <label for="cliente" class="form-label mb-0 me-2">Cliente:</label>
+                    </div>
+                    <select name="cliente" id="cliente" class="form-select me-3" style="max-width: 200px;" onchange="this.form.submit()">
+                        {% for cliente_id, cliente_display in clientes_disponiveis.items() %}
+                            <option value="{{ cliente_id }}" {% if cliente_id == cliente_atual %}selected{% endif %}>
+                                {{ cliente_display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="client-badge">
+                        <i class="bi bi-check-circle"></i> {{ cliente_nome }}
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="display-4 mb-0">
+                <i class="bi bi-person-check"></i> Face Manager
+            </h1>
+            <p class="lead mb-0">Gerenciador de Reconhecimento Facial - {{ cliente_nome }}</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Mensagens Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Formulário de Cadastro -->
+        <div class="card card-form mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-plus"></i> Cadastrar Nova Pessoa - {{ cliente_nome }}</h5>
+            </div>
+            <div class="card-body">
+                <form action="/{{ cliente_atual }}/cadastrar" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="name" class="form-label">Nome Completo</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Ex: João Silva" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="joao@email.com" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <input type="text" name="phone" id="phone" class="form-control" placeholder="+55 11 99999-9999" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="image" class="form-label">Foto</label>
+                            <input type="file" name="image" id="image" accept="image/*" class="form-control" required>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-custom btn-primary w-100">
+                                <i class="bi bi-plus-circle"></i> Cadastrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <h3>{{ pessoas|length }}</h3>
+                        <p class="mb-0">Pessoas Cadastradas</p>
+                        <small>{{ cliente_nome }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <h3>{{ clientes_disponiveis|length }}</h3>
+                        <p class="mb-0">Clientes Ativos</p>
+                        <small>Sistema Multi-Cliente</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <h3><i class="bi bi-building"></i></h3>
+                        <p class="mb-0">Cliente Atual</p>
+                        <small>{{ cliente_nome }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Pessoas -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-people"></i> Pessoas Cadastradas - {{ cliente_nome }}
+                    <span class="badge bg-light text-dark ms-2">{{ pessoas|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if pessoas %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Foto</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>ID</th>
+                                <th class="table-actions">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for id, pessoa in pessoas.items() %}
+                            <tr>
+                                <td>
+                                    <img src="/{{ cliente_atual }}/faces/{{ pessoa.image }}" alt="{{ pessoa.name }}" class="face-img">
+                                </td>
+                                <td>
+                                    <strong>{{ pessoa.name }}</strong>
+                                    <br><small class="text-muted">{{ cliente_nome }}</small>
+                                </td>
+                                <td>
+                                    <a href="mailto:{{ pessoa.email }}">{{ pessoa.email }}</a>
+                                </td>
+                                <td>
+                                    <a href="tel:{{ pessoa.phone }}">{{ pessoa.phone }}</a>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ id[:8] }}...</small>
+                                </td>
+                                <td class="table-actions">
+                                    <!-- Botão Editar -->
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editModal{{ loop.index }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    
+                                    <!-- Botão Deletar -->
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ loop.index }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    <!-- Modal de Edição -->
+                                    <div class="modal fade" id="editModal{{ loop.index }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Editar {{ pessoa.name }} - {{ cliente_nome }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="/{{ cliente_atual }}/editar/{{ id }}" method="post">
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Nome</label>
+                                                            <input type="text" name="name" class="form-control" value="{{ pessoa.name }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Email</label>
+                                                            <input type="email" name="email" class="form-control" value="{{ pessoa.email }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Telefone</label>
+                                                            <input type="text" name="phone" class="form-control" value="{{ pessoa.phone }}" required>
+                                                        </div>
+                                                        <div class="alert alert-info">
+                                                            <small><i class="bi bi-info-circle"></i> Cliente: {{ cliente_nome }}</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal de Confirmação de Exclusão -->
+                                    <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Tem certeza que deseja excluir <strong>{{ pessoa.name }}</strong>?</p>
+                                                    <div class="alert alert-warning">
+                                                        <small><i class="bi bi-exclamation-triangle"></i> Cliente: {{ cliente_nome }}</small>
+                                                    </div>
+                                                    <p class="text-danger"><small>Esta ação não pode ser desfeita!</small></p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <form action="/{{ cliente_atual }}/deletar/{{ id }}" method="post" style="display: inline;">
+                                                        <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center p-5">
+                    <i class="bi bi-person-x display-1 text-muted"></i>
+                    <h4 class="text-muted mt-3">Nenhuma pessoa cadastrada</h4>
+                    <p class="text-muted">Use o formulário acima para cadastrar a primeira pessoa no {{ cliente_nome }}!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Links Rápidos para Clientes -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-link-45deg"></i> Acesso Rápido aos Clientes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for cliente_id, cliente_display in clientes_disponiveis.items() %}
+                                <a href="/{{ cliente_id }}/" class="btn {% if cliente_id == cliente_atual %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+                                    <i class="bi bi-building"></i> {{ cliente_display }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-light text-center">
+        <div class="container">
+            <p class="text-muted mb-0">
+                <i class="bi bi-gear"></i> Face Manager Multi-Cliente - Powered by CompreFace & Flask
+            </p>
+            <small class="text-muted">Cliente Ativo: {{ cliente_nome }} | Total de Clientes: {{ clientes_disponiveis|length }}</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

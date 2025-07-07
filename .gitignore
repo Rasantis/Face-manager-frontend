@@ -1,0 +1,67 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask settings
+instance/
+*.db
+*.sqlite3
+*.log
+*.pid
+
+# IDEs
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+.coverage
+.tox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+htmlcov/
+
+# Python distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter / IPython
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Other
+*.bak
+*.swp
+*.swo
