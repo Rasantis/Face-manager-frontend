@@ -1,0 +1,66 @@
+{
+  "client": "buybye",
+  "upload_folder": "upload_images",
+  "persons": [
+    {
+      "image_file": "fad81ed0a8-40da-420a-943a-a0cb1a7dae8e-10156825ce.png",
+      "name": "login_27937",
+      "email": "login27937@buybye.com.br",
+      "phone": "+55 11 99999-7937"
+    },
+    {
+      "image_file": "fa5057cbe6-9df6-4401-b5b1-086ecc7998d3-66143068ce.png",
+      "name": "login_26156",
+      "email": "login26156@buybye.com.br",
+      "phone": "+55 11 99999-6156"
+    },
+    {
+      "image_file": "fa2fd6a5d2-e4f5-44e8-925e-8522e339ecea-35219627ce.png",
+      "name": "login_27519",
+      "email": "login27519@buybye.com.br",
+      "phone": "+55 11 99999-7519"
+    },
+    {
+      "image_file": "fa3db4eb84-e1a2-4a87-a17c-b210718c2431-20454470ce.png",
+      "name": "login_27427",
+      "email": "login27427@buybye.com.br",
+      "phone": "+55 11 99999-7427"
+    },
+    {
+      "image_file": "fa56d62091-3de0-49f6-a8b2-2192aa55fa75-58693675ce.png",
+      "name": "login_27357",
+      "email": "login27357@buybye.com.br",
+      "phone": "+55 11 99999-7357"
+    },
+    {
+      "image_file": "faceb39477-c504-4a0b-ad1a-655f104dba4b-56071024ce.png",
+      "name": "login_26904",
+      "email": "login26904@buybye.com.br",
+      "phone": "+55 11 99999-6904"
+    },
+    {
+      "image_file": "fac582ac3e-66e4-43a2-b487-070c58564789-60239942ce.png",
+      "name": "login_26756",
+      "email": "login26756@buybye.com.br",
+      "phone": "+55 11 99999-6756"
+    },
+    {
+      "image_file": "fab5221023-f14d-4796-b5f5-e2ea09684853-12025392ce.png",
+      "name": "login_27457",
+      "email": "login27457@buybye.com.br",
+      "phone": "+55 11 99999-7457"
+    },
+    {
+      "image_file": "faaddd078c-f24b-4ebf-9430-3b9d767ccced-61063228ce.png",
+      "name": "login_26567",
+      "email": "login26567@buybye.com.br",
+      "phone": "+55 11 99999-6567"
+    },
+    {
+      "image_file": "fa67730295-c717-4f12-b66c-a3937e8512ee-44748930ce.png",
+      "name": "login_26145",
+      "email": "login26145@buybye.com.br",
+      "phone": "+55 11 99999-6145"
+    }
+  ]
+}

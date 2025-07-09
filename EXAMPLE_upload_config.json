@@ -1,0 +1,18 @@
+{
+  "client": "buybye",
+  "upload_folder": "upload_images",
+  "persons": [
+    {
+      "image_file": "lasaro.jpg",
+      "name": "lasaro",
+      "email": "lasaro@buybye.com.br",
+      "phone": "+55 11 97765-5099"
+    },
+    {
+      "image_file": "musk1.jpg",
+      "name": "musk",
+      "email": "musk@buybye.com.br",
+      "phone": "+55 11 97765-6001"
+    }
+  ]
+}

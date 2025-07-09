@@ -176,21 +176,27 @@ class BulkUploader:
                 try:
                     error_data = response.json()
                     error_msg = error_data.get("error", "Erro desconhecido")
-                    
-                    # Mensagens específicas para erros comuns
+
                     if "More than one face" in str(error_msg):
                         self.log(f"❌ {name}: A imagem {image_file} contém MÚLTIPLAS FACES. Use uma imagem com apenas 1 face.", "ERROR")
+                        self.registrar_erro(name, image_file, "Múltiplas faces detectadas")
                     elif "No face found" in str(error_msg):
                         self.log(f"❌ {name}: NENHUMA FACE detectada na imagem {image_file}. Verifique se é uma foto de rosto.", "ERROR")
+                        self.registrar_erro(name, image_file, "Nenhuma face detectada")
                     elif "image_base64" in str(error_msg):
                         self.log(f"❌ {name}: Problema no formato da imagem {image_file}. Use JPG, PNG ou WEBP.", "ERROR")
+                        self.registrar_erro(name, image_file, "Erro no formato da imagem")
                     else:
                         self.log(f"❌ {name}: {error_msg}", "ERROR")
-                        
-                except:
-                    self.log(f"❌ {name}: Erro HTTP {response.status_code} - {response.text}", "ERROR")
-                return False
+                        self.registrar_erro(name, image_file, error_msg)
                 
+                except:
+                    error_message = f"Erro HTTP {response.status_code} - {response.text}"
+                    self.log(f"❌ {name}: {error_message}", "ERROR")
+                    self.registrar_erro(name, image_file, error_message)
+                return False
+
+
         except requests.exceptions.RequestException as e:
             self.log(f"Erro de rede ao cadastrar {name}: {e}", "ERROR")
             return False
@@ -198,8 +204,19 @@ class BulkUploader:
             self.log(f"Erro inesperado ao cadastrar {name}: {e}", "ERROR")
             return False
     
+
+    def registrar_erro(self, nome, imagem, mensagem):
+        """Salva informações de erro em erros_upload.txt"""
+        log_path = "erros_upload.txt"
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"{nome} | {imagem} | {mensagem}\n")
+
+
     def processar_upload(self):
         """Processa upload de todas as pessoas"""
+        # Limpar log anterior de erros
+        if os.path.exists("erros_upload.txt"):
+            os.remove("erros_upload.txt")
         self.log("🚀 Iniciando upload em lote...")
         
         self.stats["total"] = len(self.config["persons"])
