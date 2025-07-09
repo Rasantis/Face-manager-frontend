@@ -76,15 +76,30 @@ const FaceUpload: React.FC = () => {
 
       logMessage(`🎯 Face reconhecida: ${subject} (Confiança: ${(confidence * 100).toFixed(2)}%)`);
 
-      // 🔧 USAR CLIENTE SELECIONADO PELO USUÁRIO
-      const parts = subject.split('_');
-      if (parts.length < 2) {
-        logMessage(`❌ Formato de subject inválido: ${subject}`);
+
+      // 🧠 Detecta cliente com prefixo mais longo primeiro
+      const allClientKeys = Object.keys(AVAILABLE_CLIENTS).sort((a, b) => b.length - a.length);
+
+      let clienteDetectado = '';
+      let personId = '';
+
+      for (const clientKey of allClientKeys) {
+        if (subject.startsWith(clientKey + '_')) {
+          clienteDetectado = clientKey;
+          personId = subject.slice(clientKey.length + 1); // remove prefixo + "_"
+          break;
+        }
+      }
+
+      if (!clienteDetectado || !personId) {
+        logMessage(`❌ Não foi possível extrair cliente e ID do subject: ${subject}`);
         return;
       }
-      
-      const clienteDetectado = parts[0]; // Cliente detectado pelo CompreFace
-      const personId = parts.slice(1).join('_');
+
+
+
+
+
       
       logMessage(`🔍 CompreFace detectou: ${clienteDetectado} | ID: ${personId}`);
       logMessage(`🏢 Mas vamos buscar na base selecionada: ${selectedClient}`);
