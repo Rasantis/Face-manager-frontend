@@ -41,6 +41,7 @@ class BulkUploader:
             "errors": 0,
             "skipped": 0
         }
+        self.log(f"🔧 Iniciando BulkUploader para o cliente: {self.client}")
         
     def log(self, message, level="INFO"):
         """Função de log com timestamp"""
@@ -171,8 +172,23 @@ class BulkUploader:
                 self.log(f"✅ {name} cadastrado com sucesso", "SUCCESS")
                 return True
             else:
-                error_msg = response.json().get("error", "Erro desconhecido")
-                self.log(f"Erro ao cadastrar {name}: {error_msg}", "ERROR")
+                # Melhor tratamento de erro
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get("error", "Erro desconhecido")
+                    
+                    # Mensagens específicas para erros comuns
+                    if "More than one face" in str(error_msg):
+                        self.log(f"❌ {name}: A imagem {image_file} contém MÚLTIPLAS FACES. Use uma imagem com apenas 1 face.", "ERROR")
+                    elif "No face found" in str(error_msg):
+                        self.log(f"❌ {name}: NENHUMA FACE detectada na imagem {image_file}. Verifique se é uma foto de rosto.", "ERROR")
+                    elif "image_base64" in str(error_msg):
+                        self.log(f"❌ {name}: Problema no formato da imagem {image_file}. Use JPG, PNG ou WEBP.", "ERROR")
+                    else:
+                        self.log(f"❌ {name}: {error_msg}", "ERROR")
+                        
+                except:
+                    self.log(f"❌ {name}: Erro HTTP {response.status_code} - {response.text}", "ERROR")
                 return False
                 
         except requests.exceptions.RequestException as e:

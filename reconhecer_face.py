@@ -24,14 +24,14 @@ from datetime import datetime
 CLIENTE_BUSCA = "pao_de_acucar"
 
 # Imagem para reconhecimento
-IMAGEM_TESTE = "lasaro4.jpg"
+IMAGEM_TESTE = "teste_faces_bulk/jorlan.jpg"
 
 # URLs das APIs
-COMPREFACE_URL = "https://facial-api.visionlabss.com/api/v1/recognition/recognize"
+COMPREFACE_URL = "https://facial-back.visionlabss.com/api/v1/recognition/recognize"
 FACE_MANAGER_URL = "https://facial-front.visionlabss.com/api"
 
 # Chave da API CompreFace
-API_KEY = "68896071-a604-44b7-beed-6d019f6f62fe"
+API_KEY = "52f25461-4ef8-4489-a10d-c2b076fc62a2"
 HEADERS = {"x-api-key": API_KEY}
 
 def log(message, level="INFO"):

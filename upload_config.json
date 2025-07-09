@@ -1,18 +1,18 @@
 {
-  "client": "pao_de_acucar",
+  "client": "buybye",
   "upload_folder": "upload_images",
   "persons": [
     {
-      "image_file": "bolsonaro.jpg",
-      "name": "Bolsonaro",
-      "email": "bolsonaro@pao.com.br",
-      "phone": "+55 11 97777-1001"
+      "image_file": "lasaro.jpg",
+      "name": "lasaro",
+      "email": "lasaro@buybye.com.br",
+      "phone": "+55 11 97765-5099"
     },
     {
-      "image_file": "trump.jpeg", 
-      "name": "Trump",
-      "email": "trump@pao.com.br",
-      "phone": "+55 11 97777-1002"
+      "image_file": "musk1.jpg",
+      "name": "musk",
+      "email": "musk@buybye.com.br",
+      "phone": "+55 11 97765-6001"
     }
   ]
-} 
+}

@@ -11,6 +11,58 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_multi_cliente_face_manager_2024'
 
+# 🌐 Tentar importar flask-cors, se falhar usar método manual
+try:
+    from flask_cors import CORS, cross_origin
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": "*",  # 🚀 Produção: aceita qualquer origem
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "Accept"],
+            "supports_credentials": True
+        }
+    })
+    CORS_ENABLED = True
+except ImportError:
+    CORS_ENABLED = False
+    print("⚠️ flask-cors não encontrado. Usando headers CORS manuais.")
+
+# 🔧 Função para adicionar headers CORS manualmente
+def add_cors_headers(response):
+    """Adiciona headers CORS manualmente se flask-cors não estiver disponível"""
+    if not CORS_ENABLED:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Accept'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
+
+# 🚫 Função para adicionar headers anti-cache
+def add_no_cache_headers(response):
+    """Adiciona headers para evitar cache do navegador em rotas dinâmicas"""
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+# Aplicar headers CORS em todas as respostas
+@app.after_request
+def after_request(response):
+    """Processa respostas adicionando headers necessários"""
+    response = add_cors_headers(response)
+    
+    # Adicionar anti-cache para rotas específicas
+    if request.endpoint in ['client_dashboard', 'editar', 'deletar', 'api_listar_pessoas']:
+        response = add_no_cache_headers(response)
+    
+    return response
+
+# Rota OPTIONS para preflight CORS
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    response = jsonify({'status': 'ok'})
+    return add_cors_headers(response)
+
 # 🔐 Configurações de Login (Hardcoded)
 LOGIN_CREDENTIALS = {
     "email": "Rafa25santis@gmail.com",
@@ -26,7 +78,8 @@ DEFAULT_CLIENT = "carrefour"
 AVAILABLE_CLIENTS = {
     "carrefour": "Carrefour",
     "pao_de_acucar": "Pão de Açúcar", 
-    "rede_sonda": "Rede Sonda"
+    "rede_sonda": "Rede Sonda",
+    "buybye": "Buybye"
 }
 
 # =====================
@@ -182,6 +235,9 @@ def editar(cliente, subject_id):
             flash('❌ Pessoa não encontrada!', 'error')
             return redirect(url_for('client_dashboard', cliente=cliente))
         
+        # Capturar nome antigo para comparação
+        nome_antigo = metadata[subject_id]["name"]
+        
         # Atualizar dados
         metadata[subject_id]["name"] = request.form["name"]
         metadata[subject_id]["email"] = request.form["email"]
@@ -189,12 +245,18 @@ def editar(cliente, subject_id):
         
         salvar_metadata(cliente, metadata)
         client_name = AVAILABLE_CLIENTS[cliente]
-        flash(f'✅ Dados de {metadata[subject_id]["name"]} atualizados no {client_name}!', 'success')
+        
+        # Flash message mais detalhada
+        flash(f'✅ SUCESSO: Dados de "{nome_antigo}" atualizados para "{metadata[subject_id]["name"]}" no {client_name}!', 'success')
+        
+        print(f"🔧 EDIÇÃO REALIZADA: {nome_antigo} -> {metadata[subject_id]['name']} no cliente {cliente}")
         
     except Exception as e:
         flash(f'❌ Erro ao editar: {str(e)}', 'error')
+        print(f"🚨 ERRO NA EDIÇÃO: {str(e)}")
     
-    return redirect(url_for('client_dashboard', cliente=cliente))
+    # Redirect com parâmetro para forçar refresh
+    return redirect(url_for('client_dashboard', cliente=cliente, _external=True, _scheme='http'))
 
 @app.route("/<cliente>/deletar/<subject_id>", methods=["POST"])
 @login_required
@@ -214,11 +276,13 @@ def deletar(cliente, subject_id):
         # Obter informações da pessoa
         pessoa = metadata[subject_id]
         nome = pessoa["name"]
+        email = pessoa["email"]
         
         # Deletar da API do CompreFace (com prefixo do cliente)
         api_subject_id = f"{cliente}_{subject_id}"
         try:
             deletar_face(api_subject_id)
+            print(f"✅ Face deletada da API CompreFace: {api_subject_id}")
         except Exception as api_error:
             print(f"⚠️ Aviso: Erro ao deletar da API CompreFace: {api_error}")
         
@@ -227,28 +291,41 @@ def deletar(cliente, subject_id):
         img_path = os.path.join(faces_folder, pessoa["image"])
         if os.path.exists(img_path):
             os.remove(img_path)
+            print(f"🗑️ Imagem removida: {img_path}")
         
         # Remover dos metadados
         del metadata[subject_id]
         salvar_metadata(cliente, metadata)
         
         client_name = AVAILABLE_CLIENTS[cliente]
-        flash(f'🗑️ {nome} foi removido com sucesso do {client_name}!', 'success')
+        flash(f'🗑️ DELETADO: "{nome}" ({email}) foi removido com sucesso do {client_name}!', 'success')
+        
+        print(f"🗑️ EXCLUSÃO REALIZADA: {nome} ({email}) removido do cliente {cliente}")
         
     except Exception as e:
         flash(f'❌ Erro ao deletar: {str(e)}', 'error')
+        print(f"🚨 ERRO NA EXCLUSÃO: {str(e)}")
     
-    return redirect(url_for('client_dashboard', cliente=cliente))
+    # Redirect com parâmetro para forçar refresh
+    return redirect(url_for('client_dashboard', cliente=cliente, _external=True, _scheme='http'))
 
 @app.route("/<cliente>/faces/<filename>")
 @login_required
 def uploaded_file(cliente, filename):
-    """Serve as imagens do cliente específico"""
+    """Serve as imagens do cliente específico com headers anti-cache"""
     if not validate_client(cliente):
         return "Cliente não encontrado", 404
     
     faces_folder = get_faces_folder(cliente)
-    return send_from_directory(faces_folder, filename)
+    response = send_from_directory(faces_folder, filename)
+    
+    # Adicionar headers para evitar cache de imagens
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    response.headers['Last-Modified'] = 'Wed, 01 Jan 1997 12:00:00 GMT'
+    
+    return response
 
 @app.route("/trocar_cliente", methods=["POST"])
 @login_required

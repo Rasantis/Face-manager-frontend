@@ -332,5 +332,51 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 🔄 Auto-refresh para garantir dados atualizados
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar timestamp para evitar cache de imagens
+            const images = document.querySelectorAll('.face-img');
+            images.forEach(function(img) {
+                const src = img.src;
+                if (src.indexOf('?') === -1) {
+                    img.src = src + '?t=' + Date.now();
+                }
+            });
+            
+            // 🔔 Melhorar visibilidade dos alerts de sucesso
+            const successAlerts = document.querySelectorAll('.alert-success');
+            successAlerts.forEach(function(alert) {
+                alert.style.fontWeight = 'bold';
+                alert.style.border = '2px solid #28a745';
+                alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+        
+        // 🎯 Feedback visual ao submeter formulários
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                
+                if (originalText.indexOf('Salvar') !== -1) {
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+                    submitBtn.style.backgroundColor = '#ffc107';
+                } else if (originalText.indexOf('Confirmar Exclusão') !== -1) {
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Excluindo...';
+                    submitBtn.style.backgroundColor = '#dc3545';
+                }
+                
+                submitBtn.disabled = true;
+            }
+        });
+        
+        // 📊 Debug - Log de informações
+        console.log('Face Manager carregado para cliente: {{ cliente_atual }}');
+        console.log('Total de pessoas cadastradas: {{ pessoas|length }}');
+    </script>
 </body>
 </html> 
